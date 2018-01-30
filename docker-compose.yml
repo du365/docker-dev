@@ -1,0 +1,47 @@
+version: "3.3"
+services:
+  web1:
+    container_name: web-1
+    image: httpd:2.4.29-alpine
+    volumes:
+      - ../apps:/var/www/html
+      - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf
+      - ./apache/conf.d/:/usr/local/apache2/conf/conf.d/
+    ports:
+      - "80:80"
+      - "443:443"
+
+  php5:
+    container_name: php5
+    build: ./php5
+    volumes:
+      - ../apps:/var/www/html
+      - ../apps/key-master:/var/www/key-master #キー管理システム連携用
+      - ./php5/php.ini:/usr/local/etc/php/php.ini
+      - ./php5/www.conf:/usr/local/etc/php-fpm.d/www.conf
+      - ./php5/msmtprc:/etc/msmtprc
+      - ./php5/aliases:/etc/aliases
+
+  php7:
+    container_name: php7
+    build: ./php7
+    volumes:
+      - ../apps:/var/www/html
+      - ./php7/php.ini:/usr/local/etc/php/php.ini
+
+  smtp:
+    container_name: smtp
+    build: ./smtp
+
+  # database
+  db:
+    container_name: db
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/conf.d:/etc/mysql/conf.d
+      - ./mysql/db-data:/var/lib/mysql
+      - ../apps:/var/www/html
+    environment:
+          MYSQL_ROOT_PASSWORD: '0000'
